@@ -1,0 +1,23 @@
+# build output
+build/
+dist/
+logs/
+
+# binary
+*.o
+*.a
+*.so
+*.elf
+*.bin
+*.hex
+
+# editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# cmake
+CMakeCache.txt
+CMakeFiles/
+Makefile
