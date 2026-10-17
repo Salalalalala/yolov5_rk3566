@@ -1,5 +1,7 @@
 # build output
-build/
+build_arm64/
+sysroot/
+lib_lbc/
 dist/
 logs/
 
