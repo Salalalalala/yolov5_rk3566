@@ -1,6 +1,5 @@
 #utils.sh
-
-wslip=172.29.180.109
+#鲁班猫开发板ipv4地址
 lbcip=192.168.137.200
 target=demo1
 
@@ -12,7 +11,7 @@ function build(){
     ninja -C build_arm64 -j$(nproc)
 }
 
-function pushsw(){
+function sendsw(){
     rsync -avz build_arm64/$target cat@$lbcip:~/$target
 }
 
@@ -32,5 +31,4 @@ function dbg(){
     gdb-multiarch build_arm64/$target \
       --directory ~/rk3566yolo \
       -ex "target remote $lbcip:12345"
-
 }
