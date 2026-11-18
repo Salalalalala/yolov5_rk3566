@@ -9,17 +9,17 @@
 
 /* 当前注册的回调；未注册时为空，帧会被跳过 */
 static frame_callback_t g_cb   = NULL;
-static void            *g_user = NULL;
+static void *usr_ctx = NULL;
 
 void frame_set_handler(frame_callback_t cb, void *user)
 {
     g_cb   = cb;
-    g_user = user;
+    usr_ctx = user;
 }
 
 int frame_process(const void *data, size_t size, uint32_t seq)
 {
     if (!g_cb)
         return 0;                 /* 没注册回调：跳过这帧 */
-    return g_cb(data, size, seq, g_user);
+    return g_cb(data, size, seq, usr_ctx);
 }

@@ -1,14 +1,15 @@
 #utils.sh
 #---鲁班猫开发板ipv4地址----
 lbcip=192.168.137.200
-target=demo1
+# target=demo1
+target=mjpeg_preview
 gdbserver_port=12345
 
 set -euo pipefail 
 
 #---编译后的软件更新到板子上---
 sendsw(){
-    rsync -avz build_arm64/$target cat@$lbcip:~/$target
+    rsync -avz build_arm64/$target cat@$lbcip:~/ywj_demo1/$target
 }
 
 #---编译指令---

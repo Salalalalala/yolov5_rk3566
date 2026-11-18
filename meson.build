@@ -1,11 +1,22 @@
 project('yolov5_rk3566', 'c','cpp',
         version : '0.0.1')
 
-# include 路径：本工程的 include/（交叉编译时 sysroot 由 cross-rk3566.ini 生效）
-inc = include_directories('include')
+# sysroot 路径（项目约定：仓库根下的 sysroot/，由 utils.sh 的 pullsysroot 拉取）
+sys_root = meson.source_root() + '/sysroot'
 
-# meson.build
+# 让交叉编译器/链接器用这个 sysroot（头文件查找 + 库链接）。
+# Meson 0.53 不会从 cross 文件自动传 --sysroot，必须在这里显式加。
+add_project_arguments('--sysroot=' + sys_root, language: ['c', 'cpp'])
+add_project_link_arguments('--sysroot=' + sys_root, language: ['c', 'cpp'])
+
+# include 路径：本工程 include/ + 第三方 libjpeg 头文件
+inc = include_directories('include', 'third_party/libjpeg')
+
 subdir('source')
+
+# 板端 libjpeg-turbo 只有带版本号的 libjpeg.so.8（无 libjpeg.so），
+# 用 GNU ld 的 -l:libjpeg.so.8 精确指定（搜索路径由上面的 --sysroot 提供）
+jpeg_dep = declare_dependency(link_args: ['-l:libjpeg.so.8'])
 
 demo1_srcs = [
     'main.c',
@@ -29,3 +40,8 @@ endif
 executable('demo1', demo1_srcs,
     include_directories : inc,
     dependencies : demo1_deps)
+
+# mjpeg_preview：摄像头 → JPEG → HTTP multipart → VLC 播放
+executable('mjpeg_preview', ['source/preview/main.c', mjpeg_srcs],
+    include_directories : inc,
+    dependencies : [jpeg_dep])
