@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include "v4l2_capture.h"
-#include "jpeg_encode.h"
+#include "jpeg_encoder.h"
 #include "mjpeg_server.h"
 
 static volatile sig_atomic_t running = 1;
@@ -29,6 +29,13 @@ int main(int argc, char *argv[])
     struct v4l2_cam cam;
     if (v4l2_cam_open(&cam, dev, 640, 480) != 0) {
         fprintf(stderr, "打开 %s 失败\n", dev);
+        return 1;
+    }
+
+    /* 1.5 创建硬件 JPEG 编码器（用摄像头实际回读的分辨率） */
+    jpeg_encoder *enc = jpeg_encoder_create(cam.width, cam.height, quality);
+    if (!enc) {
+        v4l2_cam_close(&cam);
         return 1;
     }
 
@@ -54,8 +61,7 @@ int main(int argc, char *argv[])
 
             uint8_t *jpeg = NULL;
             size_t   jlen = 0;
-            if (jpeg_encode_nv12(f.data, cam.width, cam.height, quality,
-                                 &jpeg, &jlen) == 0) {
+            if (jpeg_encoder_encode(enc, f.data, &jpeg, &jlen) == 0) {
                 if (mjpeg_server_send_frame(cfd, jpeg, jlen) < 0) {
                     free(jpeg);
                     break;                 /* 客户端断开 → 重新 accept */
@@ -74,6 +80,7 @@ int main(int argc, char *argv[])
 
     printf("共发送 %d 帧\n", frame_n);
     mjpeg_server_close(lfd);
+    jpeg_encoder_destroy(enc);
     v4l2_cam_close(&cam);
     return 0;
 }

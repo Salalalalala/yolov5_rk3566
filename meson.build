@@ -9,14 +9,13 @@ sys_root = meson.source_root() + '/sysroot'
 add_project_arguments('--sysroot=' + sys_root, language: ['c', 'cpp'])
 add_project_link_arguments('--sysroot=' + sys_root, language: ['c', 'cpp'])
 
-# include 路径：本工程 include/ + 第三方 libjpeg 头文件
-inc = include_directories('include', 'third_party/libjpeg')
+# include 路径：本工程 include/（交叉编译时 sysroot 由 --sysroot 生效）
+inc = include_directories('include')
 
 subdir('source')
 
-# 板端 libjpeg-turbo 只有带版本号的 libjpeg.so.8（无 libjpeg.so），
-# 用 GNU ld 的 -l:libjpeg.so.8 精确指定（搜索路径由上面的 --sysroot 提供）
-jpeg_dep = declare_dependency(link_args: ['-l:libjpeg.so.8'])
+# 板端 MPP（Rockchip 媒体处理平台）硬件编码库，JPEG 编码走 VPU 硬件
+mpp_dep = declare_dependency(link_args: ['-lrockchip_mpp'])
 
 demo1_srcs = [
     'main.c',
@@ -41,7 +40,7 @@ executable('demo1', demo1_srcs,
     include_directories : inc,
     dependencies : demo1_deps)
 
-# mjpeg_preview：摄像头 → JPEG → HTTP multipart → VLC 播放
+# mjpeg_preview：摄像头 → JPEG(硬件 MPP) → HTTP multipart → VLC 播放
 executable('mjpeg_preview', ['source/preview/main.c', mjpeg_srcs],
     include_directories : inc,
-    dependencies : [jpeg_dep])
+    dependencies : [mpp_dep])
