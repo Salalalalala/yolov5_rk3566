@@ -12,3 +12,6 @@ source_srcs = v4l2_srcs + frame_srcs + internet_fns
 
 # mjpeg_preview：采集 + 编码 + 通信
 mjpeg_srcs = v4l2_srcs + encode_srcs + internet_fns
+
+# NPU 检测模块：RGA letterbox + RKNN 推理 + 解码/NMS + 画框
+detect_srcs = files('detect/rknn_detector.c')

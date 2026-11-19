@@ -17,6 +17,13 @@ subdir('source')
 # 板端 MPP（Rockchip 媒体处理平台）硬件编码库，JPEG 编码走 VPU 硬件
 mpp_dep = declare_dependency(link_args: ['-lrockchip_mpp'])
 
+# NPU 推理运行时（librknnrt，1.5.0）与 2D 加速（librga，letterbox/颜色转换）
+rknn_dep = declare_dependency(link_args: ['-lrknnrt'])
+rga_dep  = declare_dependency(link_args: ['-lrga'])
+
+# 后处理用到 expf/powf，需要显式链接 libm（--no-undefined 不会自动带）
+math_dep = declare_dependency(link_args: ['-lm'])
+
 demo1_srcs = [
     'main.c',
     source_srcs,
@@ -40,7 +47,8 @@ executable('demo1', demo1_srcs,
     include_directories : inc,
     dependencies : demo1_deps)
 
-# mjpeg_preview：摄像头 → JPEG(硬件 MPP) → HTTP multipart → VLC 播放
-executable('mjpeg_preview', ['source/preview/main.c', mjpeg_srcs],
+# mjpeg_preview：摄像头 → (RGA + RKNN 检测画框) → JPEG(硬件 MPP) → HTTP → VLC
+executable('mjpeg_preview',
+    ['source/preview/main.c', mjpeg_srcs, detect_srcs],
     include_directories : inc,
-    dependencies : [mpp_dep])
+    dependencies : [mpp_dep, rknn_dep, rga_dep, math_dep])

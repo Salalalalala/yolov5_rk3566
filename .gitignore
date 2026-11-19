@@ -1,9 +1,16 @@
 # build output
 build_arm64/
 sysroot/
+.venv/
 lib_lbc/
 dist/
 logs/
+
+# 模型产物（由 export_onnx.py / convert_rknn.py 生成，不入库）
+models/*.onnx
+models/*.rknn
+models/calib/
+models/calib.txt
 
 # binary
 *.o
