@@ -1,0 +1,34 @@
+# clangd 项目配置
+# 参见: https://clangd.llvm.org/config
+
+---
+# 对所有文件生效
+If:
+  PathMatch: .*
+
+# compile_commands.json 已由 Meson 生成（build_arm64/），软链接到项目根
+# 这里只做额外的参数补充
+
+CompileFlags:
+  # 交叉编译时，clangd 默认用主机编译器解析，需要显式指定 sysroot
+  # compile_commands.json 里已有 --sysroot，这里确保 fallback 也能工作
+  Add:
+    - --sysroot=/home/jaja/rk3566yolo/sysroot
+    - -I/home/jaja/rk3566yolo/include
+  # 主机 gcc 的标准库路径（clangd 找不到时 fallback 用）
+  Remove:
+    - -W*          # 去掉过于严格的警告，避免和 clang-tidy 重复
+
+Diagnostics:
+  # 抑制 sysroot/.venv 里第三方头文件的诊断
+  Suppress:
+    - pp_file_not_found
+    - drv_unknown_argument
+  ClangTidy:
+    Add:
+      - modernize-*
+      - readability-*
+      - bugprone-*
+    Remove:
+      - modernize-use-trailing-return-type  # C 项目不适用
+      - cppcoreguidelines-*                # C 项目不适用
