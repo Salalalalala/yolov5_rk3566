@@ -8,4 +8,4 @@ v4l2_srcs  = files('v4l2_capture.c')    # 摄像头采集
 frame_srcs = files('frame_process.c')   # 帧回调分发
 
 # mjpeg_preview：采集 + 编码 + 通信
-mjpeg_srcs = v4l2_srcs + encode_srcs + communication_srcs + detect_srcs
+mjpeg_srcs = v4l2_srcs + frame_srcs + encode_srcs + communication_srcs + detect_srcs
